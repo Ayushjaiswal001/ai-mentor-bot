@@ -1,0 +1,160 @@
+# Curriculum seed — loaded into DB by `python -m app.scripts.seed`
+# Topic titles are derived from slugs (dash→space, title-case) unless `title:` is given.
+# Pacing: ~1 topic/day (10–20 min lesson + quiz); projects span 3–7 days each.
+
+meta:
+  version: 1
+  owner: ayush
+  default_daily_hour: 20
+  default_timezone: Asia/Kolkata
+
+phases:
+  - slug: python-fundamentals
+    title: Python Fundamentals
+    topics:
+      - variables
+      - data-types
+      - lists
+      - tuples
+      - sets
+      - dictionaries
+      - functions
+      - oop
+      - modules
+      - file-handling
+      - exception-handling
+      - virtual-environments
+      - package-management
+      - working-with-apis
+    projects:
+      - calculator
+      - expense-tracker
+      - student-management-system
+
+  - slug: fastapi
+    title: FastAPI
+    topics:
+      - fastapi-basics
+      - routing
+      - get-and-post
+      - query-parameters
+      - path-parameters
+      - request-models
+      - response-models
+      - dependency-injection
+      - async-in-fastapi
+      - database-integration
+    projects:
+      - notes-api
+      - todo-api
+
+  - slug: ml-foundations
+    title: Machine Learning Foundations
+    topics:
+      - what-is-ml
+      - supervised-learning
+      - unsupervised-learning
+      - training-vs-testing
+      - overfitting
+      - underfitting
+      - regression
+      - classification
+      - decision-trees
+    projects: []
+
+  - slug: ann
+    title: Artificial Neural Networks
+    topics:
+      - neurons
+      - weights
+      - bias
+      - activation-functions
+      - forward-propagation
+      - backpropagation
+    projects: []
+
+  - slug: rnn
+    title: Recurrent Neural Networks
+    topics:
+      - sequential-data
+      - hidden-state
+      - vanishing-gradient
+    projects: []
+
+  - slug: lstm
+    title: LSTM
+    topics:
+      - cell-state
+      - forget-gate
+      - input-gate
+      - output-gate
+    projects: []
+
+  - slug: transformers
+    title: Transformers
+    topics:
+      - attention
+      - self-attention
+      - multi-head-attention
+      - encoder
+      - decoder
+      - positional-encoding
+    projects: []
+
+  - slug: llm-fundamentals
+    title: LLM Fundamentals
+    topics:
+      - tokens
+      - embeddings
+      - context-windows
+      - prompt-engineering
+      - fine-tuning
+      - rag
+      - vector-databases
+    projects: []
+
+  - slug: ai-agents
+    title: AI Agents
+    topics:
+      - what-are-ai-agents
+      - tool-calling
+      - agent-memory
+      - planning
+      - agent-architectures
+    projects: []
+
+  - slug: langchain
+    title: LangChain
+    topics:
+      - chains
+      - prompts
+      - tools
+      - memory
+      - agents
+      - rag-with-langchain
+    projects:
+      - pdf-chatbot
+      - resume-analyzer
+
+  - slug: langgraph
+    title: LangGraph
+    topics:
+      - state
+      - nodes
+      - edges
+      - multi-agent-systems
+      - workflows
+    projects:
+      - research-agent
+      - multi-agent-assistant
+
+  - slug: capstone
+    title: "Final Project: AI Interview Assistant"
+    topics: []
+    projects:
+      - slug: ai-interview-assistant
+        title: AI Interview Assistant
+        brief: >
+          Build an AI Interview Assistant with resume upload, question generation,
+          mock interviews, evaluation, feedback, and performance tracking.
+          The mentor bot coaches this build step-by-step (project_coach engine).
