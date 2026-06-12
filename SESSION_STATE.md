@@ -11,10 +11,11 @@
 
 ## Status
 
-- **Phase:** `M1 CODE COMPLETE ✅ — bot RUNNING locally, awaiting Ayush's live E2E test`
-- **Last updated:** 2026-06-12 (Session 1 cont. — M1 built: 16/16 tests pass, ruff clean, bot started in polling mode, "Application started" confirmed. All 4 .env keys filled incl. Groq fallback.)
-- **Next action:** Ayush tests in Telegram (/start → /learn → checkpoints → quiz → /progress /roadmap). Record results + bugs here, then M2 (scheduler, /today, streak jobs, /revision SRS).
-- **Dev commands:** run bot: double-click `run_bot.bat` (or `.venv\Scripts\python -m app.main`; Ctrl+C stops; only ONE instance at a time — two cause a Telegram getUpdates conflict) · test: `.venv\Scripts\python -m pytest -q` · lint: `.venv\Scripts\ruff check .` · migrate: `.venv\Scripts\alembic upgrade head` · seed: `.venv\Scripts\python -m app.scripts.seed`
+- **Phase:** `DEPLOYED TO CLOUD ☁️ — M1 + hosting (M6 pulled forward). Awaiting Ayush's live E2E test`
+- **Last updated:** 2026-06-12 (Session 1 cont. — deployed to HF Space `Ayushjaiswal001/ai-mentor-bot` (Docker, private) + Neon Postgres `ap-southeast-1`. Space stage RUNNING, /healthz {"ok":true}, single clean startup in logs. Cloud DB seeded 12/75/10. Local bot STOPPED.)
+- **Next action:** Ayush tests in Telegram (/start → /learn → checkpoints → quiz → /progress /roadmap) → verify a `users` row appears in Neon → record results here. Then decide keep-alive option (see Notes) and start M2 (scheduler, /today, streak nudges, /revision SRS).
+- **⚠️ Run rules:** the CLOUD bot is now the live instance. Do NOT run `run_bot.bat` locally while the Space is running (two pollers fight over getUpdates). For local dev: pause the Space (Settings → Pause) first. Local `.env` now points at Neon too — local runs share the same cloud DB (no split progress).
+- **Dev commands:** test: `.venv\Scripts\python -m pytest -q` · lint: `.venv\Scripts\ruff check .` · seed: `.venv\Scripts\python -m app.scripts.seed` · deploy: `git push --force https://Ayushjaiswal001:<HF_TOKEN>@huggingface.co/spaces/Ayushjaiswal001/ai-mentor-bot main` · secrets: `.venv\Scripts\python -m app.scripts.set_space_secrets Ayushjaiswal001/ai-mentor-bot <HF_TOKEN>` · test: `.venv\Scripts\python -m pytest -q` · lint: `.venv\Scripts\ruff check .` · migrate: `.venv\Scripts\alembic upgrade head` · seed: `.venv\Scripts\python -m app.scripts.seed`
 
 ## Document map (read only what you need)
 
@@ -72,9 +73,12 @@
 - [ ] LangGraph supervisor graph replaces direct calls (same engine interfaces)
 - [ ] writer→critic loop, prompt versioning, 10-task golden eval set
 
-### M6 — Ship & harden (P2)
-- [ ] Dockerfile + compose; deploy to chosen host; sqlite backup job
-- [ ] Full CI/CD (build, push GHCR, deploy step); runbook in README
+### M6 — Ship & harden (P2) — host part DONE EARLY ✅ 2026-06-12
+- [x] Dockerfile (root, HF-compatible, health server on :7860)
+- [x] Deploy: HF Space (Docker) + Neon Postgres + secrets via API; verified RUNNING + healthz OK
+- [ ] Keep-alive vs 48h sleep: AWAITING AYUSH'S CHOICE — (a) make Space public → free UptimeRobot ping on /healthz (code public = portfolio piece; bot still allowlisted) or (b) keep private → cron-job.org ping with a fine-grained HF READ token header
+- [ ] Backup story for Neon (free tier has limited point-in-time restore) — revisit at M2 close
+- [ ] Full CI/CD (GitHub repo + Action → auto-push to HF); runbook in README
 
 ### Later (P3)
 - [ ] Postgres migration · Redis jobstore/cache · webhook mode
@@ -96,6 +100,9 @@
 | 11 | Hosting: Ayush's PC during M0–M5 (fine — lessons on-demand); M6 deploy = Hugging Face Spaces Docker (free, NO credit card) + Neon Postgres free tier (HF disk is ephemeral) + UptimeRobot ping vs 48h sleep. Oracle/Fly ruled out (card issue) | No-credit-card constraint; PC not always on |
 | 12 | Start at Phase 1 Topic 1; placement quiz → Later/P3 backlog | Ayush's choice |
 | 13 | python-telegram-bot v21 confirmed; Gemini API key available; Groq fallback key optional/later | Ayush approved |
+| 14 | Hosting deployed EARLY (was M6): HF Space `Ayushjaiswal001/ai-mentor-bot` (Docker SDK, private) + Neon Postgres free (Singapore). Polling mode kept; FastAPI /healthz on :7860 satisfies HF health check + serves as keep-alive ping target | Ayush wanted 24/7 without PC/phone; no credit card on either platform |
+| 15 | `config.py` normalizes any Postgres URL (postgres→postgresql+asyncpg, sslmode→ssl, drops channel_binding) — paste raw Neon string anywhere and it works | Beginner-proof config |
+| 16 | Secrets pushed via HF API (`app/scripts/set_space_secrets.py`), not the web UI. GROQ_API_KEY turned out EMPTY (earlier filled-check was a false positive from the placeholder comment) — Gemini-only until Ayush adds a Groq key | — |
 
 ## Open questions for Ayush
 
