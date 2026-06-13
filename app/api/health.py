@@ -21,12 +21,18 @@ def healthz() -> dict:
 def start_health_server(port: int) -> None:
     """Run uvicorn in a daemon thread so it never blocks the bot's polling loop."""
 
+    log = logging.getLogger(__name__)
+
     def _run() -> None:
         import uvicorn
 
         try:
-            uvicorn.run(api, host="0.0.0.0", port=port, log_level="warning")
+            log.info("health server binding on 0.0.0.0:%s", port)
+            config = uvicorn.Config(api, host="0.0.0.0", port=port, log_level="info")
+            server = uvicorn.Server(config)
+            server.install_signal_handlers = lambda: None  # safe in a non-main thread
+            server.run()
         except Exception:
-            logging.getLogger(__name__).exception("health server failed to start")
+            log.exception("health server failed to start")
 
     threading.Thread(target=_run, daemon=True, name="health-server").start()

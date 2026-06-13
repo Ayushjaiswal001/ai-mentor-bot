@@ -1,6 +1,9 @@
 # Hugging Face Spaces (Docker SDK) — listens on 7860 for the health check.
 FROM python:3.12-slim
 
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
 WORKDIR /app
 
 COPY pyproject.toml ./
