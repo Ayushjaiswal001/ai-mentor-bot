@@ -38,7 +38,18 @@ async def setup_application(app: Application) -> None:
 
 
 def build_application() -> Application:
-    app = ApplicationBuilder().token(settings.telegram_bot_token).build()
+    app = (
+        ApplicationBuilder()
+        .token(settings.telegram_bot_token)
+        # Generous timeouts: HF container cold-start to api.telegram.org can exceed the 5s default
+        .connect_timeout(30)
+        .read_timeout(30)
+        .write_timeout(30)
+        .pool_timeout(30)
+        .get_updates_connect_timeout(30)
+        .get_updates_read_timeout(40)
+        .build()
+    )
     app.add_handler(TypeHandler(Update, middlewares.gatekeeper), group=-1)
     app.add_handler(CommandHandler("start", start.start_cmd))
     app.add_handler(CommandHandler("today", today.today_cmd))

@@ -15,13 +15,35 @@ from app.bot.app import build_application, setup_application
 logger = logging.getLogger("app.main")
 
 
-async def amain() -> None:
-    Path("data").mkdir(exist_ok=True)
+async def _bootstrap():
+    """Build + initialize + start polling. Network-touchy — caller retries on failure."""
     app = build_application()
     await app.initialize()
     await setup_application(app)
     await app.start()
     await app.updater.start_polling(drop_pending_updates=True)
+    return app
+
+
+async def amain() -> None:
+    Path("data").mkdir(exist_ok=True)
+
+    app = None
+    for attempt in range(1, 9):
+        try:
+            app = await _bootstrap()
+            break
+        except Exception as e:  # transient TimedOut/NetworkError on cold-start, Neon waking, etc.
+            logger.warning("bootstrap attempt %s failed: %r", attempt, e)
+            if app is not None:
+                try:
+                    await app.shutdown()
+                except Exception:
+                    pass
+                app = None
+            await asyncio.sleep(min(3 * attempt, 20))
+    if app is None:
+        raise RuntimeError("bot failed to start after retries")
     logger.info("bot polling started")
 
     server = make_server(int(os.environ.get("PORT", "7860")))
