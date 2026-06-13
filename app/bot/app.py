@@ -28,7 +28,8 @@ COMMANDS = [
 ]
 
 
-async def _post_init(app: Application) -> None:
+async def setup_application(app: Application) -> None:
+    """One-time async setup, called after app.initialize() in main.amain()."""
     from app.db.session import init_db
 
     await init_db()
@@ -37,9 +38,7 @@ async def _post_init(app: Application) -> None:
 
 
 def build_application() -> Application:
-    app = (
-        ApplicationBuilder().token(settings.telegram_bot_token).post_init(_post_init).build()
-    )
+    app = ApplicationBuilder().token(settings.telegram_bot_token).build()
     app.add_handler(TypeHandler(Update, middlewares.gatekeeper), group=-1)
     app.add_handler(CommandHandler("start", start.start_cmd))
     app.add_handler(CommandHandler("today", today.today_cmd))

@@ -1,7 +1,7 @@
-"""Tiny HTTP server: HF Spaces port health check + UptimeRobot keep-alive target."""
+"""Tiny HTTP server: HF Spaces port health check + keep-alive ping target.
 
-import logging
-import threading
+Runs as a coroutine in the bot's own event loop (see app/main.py) — no extra thread.
+"""
 
 from fastapi import FastAPI
 
@@ -18,21 +18,13 @@ def healthz() -> dict:
     return {"ok": True}
 
 
-def start_health_server(port: int) -> None:
-    """Run uvicorn in a daemon thread so it never blocks the bot's polling loop."""
+def make_server(port: int):
+    """A uvicorn Server that runs inside an existing loop (signal handlers disabled)."""
+    import uvicorn
 
-    log = logging.getLogger(__name__)
-
-    def _run() -> None:
-        import uvicorn
-
-        try:
-            log.info("health server binding on 0.0.0.0:%s", port)
-            config = uvicorn.Config(api, host="0.0.0.0", port=port, log_level="info")
-            server = uvicorn.Server(config)
-            server.install_signal_handlers = lambda: None  # safe in a non-main thread
-            server.run()
-        except Exception:
-            log.exception("health server failed to start")
-
-    threading.Thread(target=_run, daemon=True, name="health-server").start()
+    config = uvicorn.Config(
+        api, host="0.0.0.0", port=port, log_level="info", log_config=None
+    )
+    server = uvicorn.Server(config)
+    server.install_signal_handlers = lambda: None
+    return server
