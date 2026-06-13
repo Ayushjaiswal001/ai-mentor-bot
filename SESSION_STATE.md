@@ -80,8 +80,9 @@
 - [x] ~~Deploy: HF Space~~ ABANDONED — HF blocks Telegram egress (see CRITICAL FINDING). Migrated to Render.
 - [x] Code on GitHub (public) + `render.yaml` blueprint + port-first startup; Neon DB retained
 - [x] Ayush deployed on Render via Blueprint (blueprint exs-d8mim0bbc2fs73e1ge9g); secrets set; FIRST getUpdates probe = 409 → **bot IS polling from Render ✅** (Render reaches Telegram, unlike HF). Bot = **@trainmemybot** ("MyAImentor").
-- [ ] Keep-alive: cron-job.org → `https://<render-url>/healthz` every 10 min (Render free sleeps after 15 min idle; bot's outbound polling does NOT count as inbound traffic, so pinger is REQUIRED). Need Render public URL from Ayush.
-- [ ] Ayush live test against @trainmemybot: /start /today /learn /revision (don't use getUpdates probe — it fights the poller; message the bot instead).
+- [x] Render URL: **https://ai-mentor-bot-ztj4.onrender.com** — /healthz {"ok":true}, root alive ✅
+- [x] Keep-alive: **GitHub Actions `keepalive.yml`** pings /healthz every 10 min (active, first run triggered). NOTE: GH cron can lag + auto-disables after 60 days repo inactivity → OPTIONAL upgrade: cron-job.org monitor on the same URL for tighter timing.
+- [ ] Ayush live test against @trainmemybot: /start /today /learn /revision (don't use getUpdates probe — it fights the poller; message the bot instead). AWAITING confirmation it replied + generated a lesson (confirms Gemini reachable from Render).
 - [ ] Backup story for Neon (free tier has limited point-in-time restore) — revisit at M2 close
 - [ ] Full CI/CD (GitHub repo + Action → auto-push to HF); runbook in README
 
