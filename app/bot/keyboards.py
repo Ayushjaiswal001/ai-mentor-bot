@@ -47,3 +47,20 @@ def options_kb(prefix: str, a: int, b: int, n_options: int) -> InlineKeyboardMar
 
 def next_lesson_kb(label: str = "▶️ Next lesson") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([[InlineKeyboardButton(label, callback_data="nav:learn")]])
+
+
+def revise_kb(n: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton(f"🔁 Review now ({n})", callback_data="nav:revise")]]
+    )
+
+
+def today_kb(has_lesson: bool, due_count: int) -> InlineKeyboardMarkup | None:
+    rows = []
+    if has_lesson:
+        rows.append([InlineKeyboardButton("📘 Today's lesson", callback_data="nav:learn")])
+    if due_count > 0:
+        rows.append(
+            [InlineKeyboardButton(f"🔁 Reviews ({due_count})", callback_data="nav:revise")]
+        )
+    return InlineKeyboardMarkup(rows) if rows else None

@@ -11,9 +11,9 @@
 
 ## Status
 
-- **Phase:** `DEPLOYED TO CLOUD ☁️ — M1 + hosting (M6 pulled forward). Awaiting Ayush's live E2E test`
-- **Last updated:** 2026-06-12 (Session 1 cont. — deployed to HF Space `Ayushjaiswal001/ai-mentor-bot` (Docker, private) + Neon Postgres `ap-southeast-1`. Space stage RUNNING, /healthz {"ok":true}, single clean startup in logs. Cloud DB seeded 12/75/10. Local bot STOPPED.)
-- **Next action:** Ayush tests in Telegram (/start → /learn → checkpoints → quiz → /progress /roadmap) → verify a `users` row appears in Neon → record results here. Then decide keep-alive option (see Notes) and start M2 (scheduler, /today, streak nudges, /revision SRS).
+- **Phase:** `M2 CODE COMPLETE ✅ — deploying to cloud. M1 live-verified. Next: M3 (adaptive depth + /exercise)`
+- **Last updated:** 2026-06-12 (Session 1 cont. — M2 built: JobQueue reminders/nudges, /today, /revision SRS ladder. 24/24 tests, lint clean, app import smoke OK. Pushing to HF Space.)
+- **Next action:** confirm Space rebuild RUNNING after this push; Ayush does keep-alive (Option B: HF READ token + cron-job.org ping every 6h — STILL PENDING). Then M3: simplified/advanced lesson variants already partly wired (pick_variant), add /exercise (issue→submit→T2 rubric feedback) + Socratic hint ladder + free-text mentor chat w/ daily cap.
 - **⚠️ Run rules:** the CLOUD bot is now the live instance. Do NOT run `run_bot.bat` locally while the Space is running (two pollers fight over getUpdates). For local dev: pause the Space (Settings → Pause) first. Local `.env` now points at Neon too — local runs share the same cloud DB (no split progress).
 - **Dev commands:** test: `.venv\Scripts\python -m pytest -q` · lint: `.venv\Scripts\ruff check .` · seed: `.venv\Scripts\python -m app.scripts.seed` · deploy: `git push --force https://Ayushjaiswal001:<HF_TOKEN>@huggingface.co/spaces/Ayushjaiswal001/ai-mentor-bot main` · secrets: `.venv\Scripts\python -m app.scripts.set_space_secrets Ayushjaiswal001/ai-mentor-bot <HF_TOKEN>` · test: `.venv\Scripts\python -m pytest -q` · lint: `.venv\Scripts\ruff check .` · migrate: `.venv\Scripts\alembic upgrade head` · seed: `.venv\Scripts\python -m app.scripts.seed`
 
@@ -52,13 +52,15 @@
 - [x] Quiz engine: 5 MCQ inline quiz, idempotent answers, adaptive rule (≥80 advance / 50–79 flag / <50 repeat simplified), question bank persisted, review item on pass
 - [x] `/quiz`, `/progress`, `/roadmap`, `/help`, free-text stub
 - [x] 16/16 unit tests green (FakeLLM); bot launches, "Application started"
-- [ ] E2E manual test in real Telegram chat by Ayush → record results here
+- [x] E2E manual test in real Telegram chat by Ayush → **"test successful"** 2026-06-12 (cloud bot, Neon DB)
 
-### M2 — Memory & schedule (P0)
-- [ ] APScheduler + SQLAlchemy jobstore; jobs: daily_lesson, revision_scan, streak_nudge
-- [ ] `/today`; streaks + XP in progress engine
-- [ ] review_items + SRS ladder [1,3,7,14,30] + `/revision` flow
-- [ ] Weak-topic tracking from quiz answers
+### M2 — Memory & schedule (P0) — code ✅ 2026-06-12
+- [x] Scheduling via PTB **JobQueue** (not standalone APScheduler+jobstore — see Decision #17): `heartbeat` every 30 min → per-user daily reminder at `reminder_hour` + evening streak nudge at 21:00 local; idempotent via `job_marker` events; tz-aware (zoneinfo + tzdata dep)
+- [x] `/today` (+ shared `today_view` reused by the reminder job); streaks + XP already in progress engine
+- [x] review_items + SRS ladder [1,3,7,14,30] (`engines/revision.py`, pure `apply_ladder`) + `/revision` flow (3 Q, bank-first sampling, ≥2/3 = pass→promote / else demote); `nav:revise` button on /today + post-review
+- [x] Weak tags captured per quiz attempt (`weak_tags_json`); progress.weak_topics derives from lesson quizzes
+- [x] 24/24 tests green (8 new: ladder promote/demote/floor/retire, is_pass, due filtering, bank-reuse-no-LLM, revision finalize promotes); full app import smoke OK
+- [ ] Live E2E by Ayush: /today, /revision (after a lesson creates a due item — note: first review is due +1 day, so test by completing a lesson then waiting a day OR temporarily backdating). Reminder fires at chosen hour.
 
 ### M3 — Adaptive & exercises (P1)
 - [ ] simplified/advanced lesson variants
@@ -76,7 +78,7 @@
 ### M6 — Ship & harden (P2) — host part DONE EARLY ✅ 2026-06-12
 - [x] Dockerfile (root, HF-compatible, health server on :7860)
 - [x] Deploy: HF Space (Docker) + Neon Postgres + secrets via API; verified RUNNING + healthz OK
-- [ ] Keep-alive vs 48h sleep: AWAITING AYUSH'S CHOICE — (a) make Space public → free UptimeRobot ping on /healthz (code public = portfolio piece; bot still allowlisted) or (b) keep private → cron-job.org ping with a fine-grained HF READ token header
+- [ ] Keep-alive: Ayush chose (b) — Space stays PRIVATE; cron-job.org pings `https://ayushjaiswal001-ai-mentor-bot.hf.space/healthz` every 6 h with header `Authorization: Bearer <HF READ token>`. Pending: Ayush creates READ token + cron job (or provides cron-job.org API key)
 - [ ] Backup story for Neon (free tier has limited point-in-time restore) — revisit at M2 close
 - [ ] Full CI/CD (GitHub repo + Action → auto-push to HF); runbook in README
 
@@ -103,6 +105,8 @@
 | 14 | Hosting deployed EARLY (was M6): HF Space `Ayushjaiswal001/ai-mentor-bot` (Docker SDK, private) + Neon Postgres free (Singapore). Polling mode kept; FastAPI /healthz on :7860 satisfies HF health check + serves as keep-alive ping target | Ayush wanted 24/7 without PC/phone; no credit card on either platform |
 | 15 | `config.py` normalizes any Postgres URL (postgres→postgresql+asyncpg, sslmode→ssl, drops channel_binding) — paste raw Neon string anywhere and it works | Beginner-proof config |
 | 16 | Secrets pushed via HF API (`app/scripts/set_space_secrets.py`), not the web UI. GROQ_API_KEY turned out EMPTY (earlier filled-check was a false positive from the placeholder comment) — Gemini-only until Ayush adds a Groq key | — |
+| 17 | Scheduling = PTB JobQueue (in-process), NOT standalone APScheduler + SQLAlchemy jobstore as design §10 first said. Jobs are code-defined recurring scans re-registered each boot; only durable state is in Postgres; idempotency via `job_marker` events. Simpler, one process, survives HF container restarts. Revisit only at multi-instance scale | Avoids an asyncpg-jobstore complication; PTB JobQueue is the native fit |
+| 18 | `/revision` reviews ONE most-due topic per invocation (loops via "Review now (n)" button) rather than batching all due topics into one mega-quiz | Keeps the inline-button quiz machinery reused as-is; better UX in chat |
 
 ## Open questions for Ayush
 

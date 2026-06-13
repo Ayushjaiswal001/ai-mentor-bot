@@ -10,15 +10,18 @@ from app.engines import progress
 
 HELP = (
     "🧭 <b>How your mentor works</b>\n\n"
+    "/today — your daily plan at a glance\n"
     "/learn — start or resume a lesson (10–20 min, stop any time)\n"
     "/quiz — 5 questions on your current topic\n"
+    "/revision — spaced-repetition reviews of past topics\n"
     "/progress — streak, XP, scores, weak spots\n"
     "/roadmap — the journey: Python → FastAPI → ML → Transformers → LLMs → LangGraph\n\n"
     "<b>The method:</b>\n"
     "• Active recall — I ask before I tell.\n"
     "• Adaptive difficulty — score ≥80% advances you; &lt;50% gets a simpler retake.\n"
-    "• Spaced repetition — topics come back at 1/3/7/14/30 days <i>(ships next update)</i>.\n\n"
-    "Coming soon: /today · /revision · /exercise · /project · /settings"
+    "• Spaced repetition — topics return at 1/3/7/14/30 days; pass to push them further out.\n"
+    "• Daily nudge — set a reminder time in /start (or turn it off).\n\n"
+    "Coming soon: /exercise · /project · /settings · free-chat mentor"
 )
 
 FREE_TEXT = (

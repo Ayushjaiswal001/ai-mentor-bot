@@ -12,13 +12,16 @@ from telegram.ext import (
 )
 
 from app.bot import callbacks, middlewares
-from app.bot.handlers import info, learn, quiz, start
+from app.bot.handlers import info, learn, quiz, revision, start, today
 from app.config import settings
+from app.scheduler.setup import register_jobs
 
 COMMANDS = [
     ("start", "Set up / restart your mentor"),
+    ("today", "Your daily plan"),
     ("learn", "Start or resume a lesson"),
     ("quiz", "Quiz on the current topic"),
+    ("revision", "Spaced-repetition reviews"),
     ("progress", "Streak, XP, scores"),
     ("roadmap", "The full journey map"),
     ("help", "How this works"),
@@ -29,6 +32,7 @@ async def _post_init(app: Application) -> None:
     from app.db.session import init_db
 
     await init_db()
+    register_jobs(app)
     await app.bot.set_my_commands([BotCommand(c, d) for c, d in COMMANDS])
 
 
@@ -38,8 +42,10 @@ def build_application() -> Application:
     )
     app.add_handler(TypeHandler(Update, middlewares.gatekeeper), group=-1)
     app.add_handler(CommandHandler("start", start.start_cmd))
+    app.add_handler(CommandHandler("today", today.today_cmd))
     app.add_handler(CommandHandler("learn", learn.learn_cmd))
     app.add_handler(CommandHandler("quiz", quiz.quiz_cmd))
+    app.add_handler(CommandHandler("revision", revision.revision_cmd))
     app.add_handler(CommandHandler("progress", info.progress_cmd))
     app.add_handler(CommandHandler("roadmap", info.roadmap_cmd))
     app.add_handler(CommandHandler("help", info.help_cmd))

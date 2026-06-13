@@ -3,7 +3,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from app.bot.handlers import learn, quiz, start
+from app.bot.handlers import learn, quiz, revision, start
 from app.bot.users import ensure_user
 from app.db.session import SessionLocal
 
@@ -27,6 +27,8 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 await learn.start_flow(message, session, user, state)
             case ["nav", "quiz", topic_id]:
                 await quiz.begin(message, session, user, state, int(topic_id))
+            case ["nav", "revise"]:
+                await revision.begin(message, session, user, state)
             case ["nav", "later"]:
                 await message.reply_html("👍 No rush — the quiz waits. Send /quiz when ready.")
             case ["ck", lesson_id, sec_idx, choice]:

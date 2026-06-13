@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 from app.agents.llm_router import LLMBudgetExceeded, LLMUnavailable
 from app.bot.formatting import esc, md_to_html, send_html
 from app.bot.handlers.learn import options_text
-from app.bot.keyboards import next_lesson_kb, options_kb
+from app.bot.keyboards import next_lesson_kb, options_kb, revise_kb
 from app.bot.users import ensure_user
 from app.db.models import Quiz, QuizAttempt, Topic, User, UserState
 from app.db.session import SessionLocal
@@ -45,7 +45,7 @@ async def begin(
 
 
 async def send_question(message: Message, quiz: Quiz, attempt: QuizAttempt, q_idx: int) -> None:
-    qs = quiz_engine.questions_of(quiz).questions
+    qs = quiz_engine.questions_of(quiz)
     q = qs[q_idx]
     await send_html(
         message,
@@ -87,7 +87,36 @@ async def on_answer(
         return
 
     report = await quiz_engine.finalize(session, user, state, quiz, attempt)
-    await send_html(message, render_report(report), kb=report_kb(report))
+    if report["kind"] == "revision":
+        await send_html(message, render_revision_report(report), kb=revision_followup_kb(report))
+    else:
+        await send_html(message, render_report(report), kb=report_kb(report))
+
+
+def render_revision_report(r: dict) -> str:
+    head = "✅ <b>Review passed!</b>" if r["passed"] else "🔁 <b>Needs another pass</b>"
+    lines = [f"{head}  ({r['n_correct']}/{r['n_total']})", ""]
+    if r["retired"]:
+        lines.append("🏆 You've mastered this topic — it graduates from revision!")
+    elif r["passed"]:
+        lines.append(f"📈 Great — I'll bring it back in <b>{r['next_interval_days']} days</b>.")
+    else:
+        lines.append(
+            f"No worries — I'll resurface it sooner (in <b>{r['next_interval_days']} day(s)</b>) "
+            "so it sticks."
+        )
+    if r["remaining_due"] > 0:
+        lines.append(f"\n📚 <b>{r['remaining_due']}</b> more review(s) due today.")
+    else:
+        lines.append("\n🎉 That's all your reviews for today. Nicely done!")
+    lines.append(f"🔥 Streak: <b>{r['streak']}</b> · ⭐ +{r['xp_gain']} XP (total {r['xp_total']})")
+    return "\n".join(lines)
+
+
+def revision_followup_kb(r: dict):
+    if r["remaining_due"] > 0:
+        return revise_kb(r["remaining_due"])
+    return None
 
 
 def render_report(r: dict) -> str:
