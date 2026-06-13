@@ -79,9 +79,9 @@
 - [x] Dockerfile (root, HF-compatible, health server on :7860)
 - [x] ~~Deploy: HF Space~~ ABANDONED — HF blocks Telegram egress (see CRITICAL FINDING). Migrated to Render.
 - [x] Code on GitHub (public) + `render.yaml` blueprint + port-first startup; Neon DB retained
-- [ ] Ayush: deploy on Render via Blueprint + paste secrets (IN PROGRESS)
-- [ ] Keep-alive: cron-job.org → `https://<render-url>/healthz` every 10 min (public URL, no auth header)
-- [ ] After Render live: verify getUpdates 409 (bot polling) + Ayush re-runs /start /learn /today /revision in Telegram
+- [x] Ayush deployed on Render via Blueprint (blueprint exs-d8mim0bbc2fs73e1ge9g); secrets set; FIRST getUpdates probe = 409 → **bot IS polling from Render ✅** (Render reaches Telegram, unlike HF). Bot = **@trainmemybot** ("MyAImentor").
+- [ ] Keep-alive: cron-job.org → `https://<render-url>/healthz` every 10 min (Render free sleeps after 15 min idle; bot's outbound polling does NOT count as inbound traffic, so pinger is REQUIRED). Need Render public URL from Ayush.
+- [ ] Ayush live test against @trainmemybot: /start /today /learn /revision (don't use getUpdates probe — it fights the poller; message the bot instead).
 - [ ] Backup story for Neon (free tier has limited point-in-time restore) — revisit at M2 close
 - [ ] Full CI/CD (GitHub repo + Action → auto-push to HF); runbook in README
 
