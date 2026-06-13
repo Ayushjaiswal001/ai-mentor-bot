@@ -28,6 +28,10 @@ async def _bootstrap():
 async def amain() -> None:
     Path("data").mkdir(exist_ok=True)
 
+    from app.diagnostics import run_probe
+
+    await run_probe()
+
     app = None
     for attempt in range(1, 9):
         try:
