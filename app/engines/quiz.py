@@ -25,7 +25,7 @@ from app.db.models import (
     User,
     UserState,
 )
-from app.engines import learning, progress, revision
+from app.engines import assessment, learning, progress, revision
 
 
 async def start_for_topic(
@@ -91,6 +91,21 @@ async def finalize(
         if attempt.answers_json.get(str(i)) != q.correct_index
     ]
     attempt.weak_tags_json = {"tags": weak_tags}
+
+    if quiz.kind == "weekly":
+        card = await assessment.record(session, user, score, n_correct, n, weak_tags)
+        progress.tick_activity(state, progress.XP["quiz"] + progress.XP["quiz_bonus"])
+        await session.commit()
+        return {
+            "kind": "weekly",
+            "score": score,
+            "n_correct": n_correct,
+            "n_total": n,
+            "weak_tags": weak_tags,
+            "trend": card["trend"],
+            "streak": state.streak_count,
+            "xp_total": state.xp,
+        }
 
     if quiz.kind == "revision":
         result = await revision.record_review(session, user, quiz.topic_id, n_correct, n)

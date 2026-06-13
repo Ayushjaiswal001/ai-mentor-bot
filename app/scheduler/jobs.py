@@ -27,6 +27,11 @@ NUDGE_TEXT = (
     "A quick lesson or a review keeps 🔥 <b>{streak}</b> alive. Send /today to see what's up."
 )
 
+WEEKLY_TEXT = (
+    "📊 <b>It's assessment day!</b>\n"
+    "Take this week's checkpoint with /assessment and see how much has stuck. 💪"
+)
+
 
 def _tz(name: str) -> ZoneInfo:
     try:
@@ -73,6 +78,16 @@ async def heartbeat(context: ContextTypes.DEFAULT_TYPE) -> None:
                     if has_todo:
                         await _safe_send(context, user.tg_user_id, text, kb)
                     _mark(session, user.id, "reminder", day)
+
+            # Sunday weekly-assessment nudge at the user's reminder hour
+            if (
+                now.weekday() == 6
+                and user.reminder_hour is not None
+                and now.hour == user.reminder_hour
+                and not await _marked(session, user.id, "weekly", day)
+            ):
+                await _safe_send(context, user.tg_user_id, WEEKLY_TEXT, None)
+                _mark(session, user.id, "weekly", day)
 
             # Evening streak nudge if nothing done today (and reminder didn't already cover it)
             if now.hour == NUDGE_HOUR and state.last_active_date != now.date():

@@ -15,6 +15,8 @@ HELP = (
     "/quiz — 5 questions on your current topic\n"
     "/revision — spaced-repetition reviews of past topics\n"
     "/exercise — a coding exercise I grade with feedback\n"
+    "/project — build a real project, coached step by step\n"
+    "/assessment — your weekly checkpoint across recent topics\n"
     "/progress — streak, XP, scores, weak spots\n"
     "/roadmap — the journey: Python → FastAPI → ML → Transformers → LLMs → LangGraph\n"
     "/settings — difficulty & reminder time\n\n"
@@ -23,8 +25,9 @@ HELP = (
     "• Active recall — I ask before I tell.\n"
     "• Adaptive difficulty — score ≥80% advances you; &lt;50% gets a simpler retake.\n"
     "• Spaced repetition — topics return at 1/3/7/14/30 days; pass to push them further out.\n"
-    "• Daily nudge — set a reminder time in /settings (or turn it off).\n\n"
-    "Coming soon: /project · weekly assessment"
+    "• Project-based — every phase ends in a project for your portfolio.\n"
+    "• Weekly checkpoint — every Sunday, /assessment scores how much stuck.\n\n"
+    "Next up: the multi-agent upgrade 🤖"
 )
 
 

@@ -55,6 +55,29 @@ def revise_kb(n: int) -> InlineKeyboardMarkup:
     )
 
 
+def project_start_kb(pp_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton("🚀 Start project", callback_data=f"pj:start:{pp_id}")]]
+    )
+
+
+def project_step_kb(pp_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("✅ Step done", callback_data=f"pj:next:{pp_id}"),
+                InlineKeyboardButton("💡 Guidance", callback_data=f"pj:guide:{pp_id}"),
+            ]
+        ]
+    )
+
+
+def project_submit_kb(pp_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton("🎓 Submit project", callback_data=f"pj:submit:{pp_id}")]]
+    )
+
+
 def exercise_kb(ex_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [

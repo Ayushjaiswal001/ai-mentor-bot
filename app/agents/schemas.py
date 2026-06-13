@@ -72,3 +72,21 @@ class EvalSchema(BaseModel):
     strengths: list[str] = Field(max_length=5)
     issues: list[str] = Field(max_length=5)
     suggestion: str  # one concrete, encouraging next step (Socratic, not the full solution)
+
+
+class ProjectStep(BaseModel):
+    title: str
+    goal: str
+    details_md: str
+    done_when: str  # how the student knows this step is complete
+
+
+class ProjectPlan(BaseModel):
+    project_slug: str
+    title: str
+    overview: str
+    steps: list[ProjectStep] = Field(min_length=4, max_length=10)
+
+
+class AssessmentSchema(BaseModel):
+    questions: list[MCQ] = Field(min_length=6, max_length=8)

@@ -12,7 +12,18 @@ from telegram.ext import (
 )
 
 from app.bot import callbacks, middlewares
-from app.bot.handlers import chat, exercise, info, learn, quiz, revision, start, today
+from app.bot.handlers import (
+    assessment,
+    chat,
+    exercise,
+    info,
+    learn,
+    project,
+    quiz,
+    revision,
+    start,
+    today,
+)
 from app.bot.handlers import settings as settings_h
 from app.config import settings
 from app.scheduler.setup import register_jobs
@@ -24,6 +35,8 @@ COMMANDS = [
     ("quiz", "Quiz on the current topic"),
     ("revision", "Spaced-repetition reviews"),
     ("exercise", "Coding exercise (AI-graded)"),
+    ("project", "Build a project, step by step"),
+    ("assessment", "Weekly assessment"),
     ("progress", "Streak, XP, scores"),
     ("roadmap", "The full journey map"),
     ("settings", "Difficulty & reminders"),
@@ -60,6 +73,8 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("quiz", quiz.quiz_cmd))
     app.add_handler(CommandHandler("revision", revision.revision_cmd))
     app.add_handler(CommandHandler("exercise", exercise.exercise_cmd))
+    app.add_handler(CommandHandler("project", project.project_cmd))
+    app.add_handler(CommandHandler("assessment", assessment.assessment_cmd))
     app.add_handler(CommandHandler("progress", info.progress_cmd))
     app.add_handler(CommandHandler("roadmap", info.roadmap_cmd))
     app.add_handler(CommandHandler("settings", settings_h.settings_cmd))

@@ -11,8 +11,8 @@
 
 ## Status
 
-- **Phase:** `M3 CODE COMPLETE ✅ — deploying to Render. Bot LIVE on Render. Next: M4 (projects + weekly assessment)`
-- **Last updated:** 2026-06-13 (Session 1 cont. — M3 built: /exercise AI-graded, Socratic free-text mentor, /settings, lesson variants. 30/30 tests. Pushing to GitHub→Render.)
+- **Phase:** `M4 CODE COMPLETE ✅ — deploying to Render. Only M5 (LangGraph multi-agent) remains. Then DONE.`
+- **Last updated:** 2026-06-13 (Session 1 cont. — M4 built: project coach + weekly assessment. 35/35 tests. Pushing to GitHub→Render.)
 - **Next action:** confirm Render redeploy polling (409 probe) + healthz; Ayush live-tests /exercise + free-text chat + /settings. Then M4: project coach (plan→steps→review) + Sunday weekly assessment + report card.
 - **Deploy:** `git push origin main` → GitHub `Ayushjaiswal001/ai-mentor-bot` → **Render auto-deploys** (~3-5 min). Render URL https://ai-mentor-bot-ztj4.onrender.com. Bot @trainmemybot. Neon Postgres (Singapore). Keep-alive = GitHub Actions `keepalive.yml` every 10 min.
 - **⚠️ Run rules:** the CLOUD bot is now the live instance. Do NOT run `run_bot.bat` locally while the Space is running (two pollers fight over getUpdates). For local dev: pause the Space (Settings → Pause) first. Local `.env` now points at Neon too — local runs share the same cloud DB (no split progress).
@@ -71,9 +71,13 @@
 - [x] 30/30 tests (6 new: exercise issue/submit/skip, variant-by-difficulty, mentor answer+cap); app wiring smoke OK
 - [ ] Live test by Ayush after deploy: /exercise → submit code → graded; type a question → Socratic reply; /settings → set Harder → next /learn is deeper
 
-### M4 — Projects & weekly assessment (P1)
-- [ ] Project coach engine (`plan_json` steps, check-ins), `/project`
-- [ ] Sunday weekly assessment job + report card
+### M4 — Projects & weekly assessment (P1) — code ✅ 2026-06-13
+- [x] Project coach (`engines/project_coach.py`): propose (T2 plan in ProjectProgress.plan_json) → /project → 🚀 Start → step-by-step (✅ Step done self-report + 💡 Guidance T1 hint) → 🎓 Submit → T2 holistic review → status=done + portfolio msg. Final submission gated via context.user_data["project_submit"] (chat.py precedence: project > exercise > Socratic)
+- [x] Weekly assessment (`engines/assessment.py` + node, T2): 6–8 MCQs across recent-completed + weak topics; `/assessment` on-demand; kind="weekly" reuses quiz delivery; finalize stores Assessment row + report card with trend vs last week
+- [x] Sunday nudge in scheduler heartbeat (weekday()==6 at reminder hour, "weekly" marker)
+- [x] `/project` `/assessment` commands; quiz.finalize weekly branch; help updated
+- [x] 35/35 tests (5 new: project propose/advance/complete/review, assessment scope/flow/empty); app wiring smoke OK
+- [ ] Live test by Ayush after deploy: /project (Phase 1 → Calculator plan → steps → submit), /assessment (after completing lessons)
 
 ### M5 — Multi-agent upgrade (P2)
 - [ ] LangGraph supervisor graph replaces direct calls (same engine interfaces)

@@ -89,6 +89,10 @@ async def on_answer(
     report = await quiz_engine.finalize(session, user, state, quiz, attempt)
     if report["kind"] == "revision":
         await send_html(message, render_revision_report(report), kb=revision_followup_kb(report))
+    elif report["kind"] == "weekly":
+        from app.bot.handlers.assessment import render_weekly_report
+
+        await send_html(message, render_weekly_report(report))
     else:
         await send_html(message, render_report(report), kb=report_kb(report))
 
