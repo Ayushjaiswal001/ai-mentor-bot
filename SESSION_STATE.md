@@ -11,8 +11,8 @@
 
 ## Status
 
-- **Phase:** `M4 CODE COMPLETE ✅ — deploying to Render. Only M5 (LangGraph multi-agent) remains. Then DONE.`
-- **Last updated:** 2026-06-13 (Session 1 cont. — M4 built: project coach + weekly assessment. 35/35 tests. Pushing to GitHub→Render.)
+- **Phase:** `M5 CODE COMPLETE ✅ — deploying. ALL MILESTONES M0–M5 DONE. Bot feature-complete per original spec.`
+- **Last updated:** 2026-06-13 (Session 1 cont. — M5 built: LangGraph Writer→Critic lesson graph. 39/39 tests. Pushing to GitHub→Render. langgraph dep added → slower build.)
 - **Next action:** confirm Render redeploy polling (409 probe) + healthz; Ayush live-tests /exercise + free-text chat + /settings. Then M4: project coach (plan→steps→review) + Sunday weekly assessment + report card.
 - **Deploy:** `git push origin main` → GitHub `Ayushjaiswal001/ai-mentor-bot` → **Render auto-deploys** (~3-5 min). Render URL https://ai-mentor-bot-ztj4.onrender.com. Bot @trainmemybot. Neon Postgres (Singapore). Keep-alive = GitHub Actions `keepalive.yml` every 10 min.
 - **⚠️ Run rules:** the CLOUD bot is now the live instance. Do NOT run `run_bot.bat` locally while the Space is running (two pollers fight over getUpdates). For local dev: pause the Space (Settings → Pause) first. Local `.env` now points at Neon too — local runs share the same cloud DB (no split progress).
@@ -79,9 +79,12 @@
 - [x] 35/35 tests (5 new: project propose/advance/complete/review, assessment scope/flow/empty); app wiring smoke OK
 - [ ] Live test by Ayush after deploy: /project (Phase 1 → Calculator plan → steps → submit), /assessment (after completing lessons)
 
-### M5 — Multi-agent upgrade (P2)
-- [ ] LangGraph supervisor graph replaces direct calls (same engine interfaces)
-- [ ] writer→critic loop, prompt versioning, 10-task golden eval set
+### M5 — Multi-agent upgrade (P2) — code ✅ 2026-06-13
+- [x] **LangGraph** lesson pipeline (`app/agents/graph.py`): Writer (T1) → Critic (T0) → conditional edge (revise→writer | accept→END), MAX_DRAFTS=2 (1 initial + 1 revision cap). `learning.get_or_create_lesson` now calls `run_lesson_graph` (same LessonSchema interface — zero downstream change)
+- [x] Critic node (`nodes/critic.py` + `lesson_critic.md`, T0): checks checkpoints exist, code actually runs, difficulty matches variant, no vague/incorrect explanations → Critique{ok, notes}; notes fed back into writer prompt on revision
+- [x] 39/39 tests (4 new graph: first-pass accept, 1-revision loop, revision cap, notes-fed-back). Graph compiled per-call w/ session-bound node closures (no config plumbing)
+- [ ] (deferred, optional) extend writer→critic to quizzes; prompt versioning already logged via PROMPT_VERSION; 10-task golden eval set — nice-to-have, not blocking
+- [ ] Live test by Ayush after deploy: /learn still works (now graph-backed — should be same or better quality)
 
 ### M6 — Ship & harden (P2) — host part DONE EARLY ✅ 2026-06-12
 - [x] Dockerfile (root, HF-compatible, health server on :7860)

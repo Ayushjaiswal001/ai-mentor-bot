@@ -16,6 +16,7 @@ async def generate_lesson(
     phase_title: str,
     variant: str = "standard",
     recap: str | None = None,
+    critique_notes: str | None = None,
     user_id: int | None = None,
 ) -> LessonSchema:
     system = render_system(profile)
@@ -27,5 +28,6 @@ async def generate_lesson(
         phase_title=phase_title,
         variant=variant,
         recap=recap,
+        critique_notes=critique_notes,
     )
     return await llm_router.generate_json(session, "t1", system, task, LessonSchema, user_id)

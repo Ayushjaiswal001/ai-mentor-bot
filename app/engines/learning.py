@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.nodes import lesson_writer
+from app.agents import graph as agent_graph
 from app.agents.nodes.base import PROMPT_VERSION
 from app.config import settings
 from app.db.models import Lesson, Phase, Quiz, QuizAttempt, Topic, User, UserState
@@ -94,7 +94,7 @@ async def get_or_create_lesson(
     )
     if lesson is None:
         profile = await progress_engine.build_profile(session, user, state)
-        schema = await lesson_writer.generate_lesson(
+        schema = await agent_graph.run_lesson_graph(
             session,
             profile=profile,
             topic_title=topic.title,

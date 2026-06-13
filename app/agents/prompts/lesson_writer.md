@@ -9,6 +9,11 @@ Variant: {{ variant }}
 {% if recap %}
 Open the concept section with a 3-line recap of "{{ recap }}" — the student struggled with it.
 {% endif %}
+{% if critique_notes %}
+⚠️ A reviewer rejected your previous draft. Produce a NEW, corrected version that fixes ALL of
+these issues precisely:
+{{ critique_notes }}
+{% endif %}
 
 The lesson must take 10–20 minutes total and follow this structure in the sections array,
 in this exact order:

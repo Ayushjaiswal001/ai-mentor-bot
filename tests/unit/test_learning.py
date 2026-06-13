@@ -7,7 +7,12 @@ from tests.factories import fake_lesson
 
 
 def patch_lesson_llm(monkeypatch, counter: dict):
+    """Writer returns a lesson (counted); critic always approves it."""
+    from app.agents.schemas import Critique
+
     async def fake_generate_json(session, tier, system, user_text, schema_cls, user_id=None):
+        if schema_cls is Critique:
+            return Critique(ok=True, notes="")
         counter["n"] += 1
         return fake_lesson()
 

@@ -90,3 +90,8 @@ class ProjectPlan(BaseModel):
 
 class AssessmentSchema(BaseModel):
     questions: list[MCQ] = Field(min_length=6, max_length=8)
+
+
+class Critique(BaseModel):
+    ok: bool  # is the draft good enough to teach from?
+    notes: str = ""  # if not ok: specific, actionable fixes for the writer
