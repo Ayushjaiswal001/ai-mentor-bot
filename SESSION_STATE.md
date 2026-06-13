@@ -77,8 +77,11 @@
 
 ### M6 — Ship & harden (P2) — host part DONE EARLY ✅ 2026-06-12
 - [x] Dockerfile (root, HF-compatible, health server on :7860)
-- [x] Deploy: HF Space (Docker) + Neon Postgres + secrets via API; verified RUNNING + healthz OK
-- [ ] Keep-alive: Ayush chose (b) — Space stays PRIVATE; cron-job.org pings `https://ayushjaiswal001-ai-mentor-bot.hf.space/healthz` every 6 h with header `Authorization: Bearer <HF READ token>`. Pending: Ayush creates READ token + cron job (or provides cron-job.org API key)
+- [x] ~~Deploy: HF Space~~ ABANDONED — HF blocks Telegram egress (see CRITICAL FINDING). Migrated to Render.
+- [x] Code on GitHub (public) + `render.yaml` blueprint + port-first startup; Neon DB retained
+- [ ] Ayush: deploy on Render via Blueprint + paste secrets (IN PROGRESS)
+- [ ] Keep-alive: cron-job.org → `https://<render-url>/healthz` every 10 min (public URL, no auth header)
+- [ ] After Render live: verify getUpdates 409 (bot polling) + Ayush re-runs /start /learn /today /revision in Telegram
 - [ ] Backup story for Neon (free tier has limited point-in-time restore) — revisit at M2 close
 - [ ] Full CI/CD (GitHub repo + Action → auto-push to HF); runbook in README
 
@@ -121,8 +124,9 @@ Proven by an in-container network probe (`app/diagnostics.py`):
 - The single-loop + resilient-bootstrap rewrite (commits after 69ca93d) is GOOD and host-agnostic — keep it. The diagnostic call was removed from `amain` (module kept for future host checks).
 - The earlier M1 "test successful" was the LOCAL bot (running on Ayush's PC at the time), not the cloud one.
 
-**DECISION PENDING (Ayush):** pick a new host that can reach Telegram, free, no credit card.
-Leading candidate: **Render** free web service (reaches Telegram; no CC; needs a keep-alive ping vs 15-min idle spin-down; 750 hrs/mo ≈ one always-on service). Requires code on GitHub (Ayush has an account; public repo = portfolio bonus; bot stays allowlisted). Alt: Koyeb (may require CC). Neon DB stays as-is. HF Space can be deleted later.
+**DECISION MADE (Ayush): Render.** Code now on GitHub: **https://github.com/Ayushjaiswal001/ai-mentor-bot** (public, secrets gitignored). `render.yaml` blueprint committed. `main.py` opens health port first (parallel to bot bootstrap) so Render's health check passes fast. Neon DB unchanged. HF Space can be deleted later.
+**PENDING (Ayush, in browser):** sign up render.com w/ GitHub → New+ → Blueprint → pick repo → paste 4 secrets (TELEGRAM_BOT_TOKEN, ALLOWED_TG_USER_IDS, GEMINI_API_KEY, DATABASE_URL; GROQ/OPENAI optional) → deploy. Then cron-job.org ping on `https://<render-url>/healthz` every 10 min (Render free spins down after 15 min idle; Render URL is PUBLIC so no auth header needed — simpler than the old HF/private plan).
+**Deploy workflow now:** `git push origin main` → Render auto-deploys (autoDeploy:true). HF push no longer used.
 
 ## Notes / surprises
 
