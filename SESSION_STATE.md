@@ -11,9 +11,10 @@
 
 ## Status
 
-- **Phase:** `M2 CODE COMPLETE ✅ — deploying to cloud. M1 live-verified. Next: M3 (adaptive depth + /exercise)`
-- **Last updated:** 2026-06-12 (Session 1 cont. — M2 built: JobQueue reminders/nudges, /today, /revision SRS ladder. 24/24 tests, lint clean, app import smoke OK. Pushing to HF Space.)
-- **Next action:** confirm Space rebuild RUNNING after this push; Ayush does keep-alive (Option B: HF READ token + cron-job.org ping every 6h — STILL PENDING). Then M3: simplified/advanced lesson variants already partly wired (pick_variant), add /exercise (issue→submit→T2 rubric feedback) + Socratic hint ladder + free-text mentor chat w/ daily cap.
+- **Phase:** `M3 CODE COMPLETE ✅ — deploying to Render. Bot LIVE on Render. Next: M4 (projects + weekly assessment)`
+- **Last updated:** 2026-06-13 (Session 1 cont. — M3 built: /exercise AI-graded, Socratic free-text mentor, /settings, lesson variants. 30/30 tests. Pushing to GitHub→Render.)
+- **Next action:** confirm Render redeploy polling (409 probe) + healthz; Ayush live-tests /exercise + free-text chat + /settings. Then M4: project coach (plan→steps→review) + Sunday weekly assessment + report card.
+- **Deploy:** `git push origin main` → GitHub `Ayushjaiswal001/ai-mentor-bot` → **Render auto-deploys** (~3-5 min). Render URL https://ai-mentor-bot-ztj4.onrender.com. Bot @trainmemybot. Neon Postgres (Singapore). Keep-alive = GitHub Actions `keepalive.yml` every 10 min.
 - **⚠️ Run rules:** the CLOUD bot is now the live instance. Do NOT run `run_bot.bat` locally while the Space is running (two pollers fight over getUpdates). For local dev: pause the Space (Settings → Pause) first. Local `.env` now points at Neon too — local runs share the same cloud DB (no split progress).
 - **Dev commands:** test: `.venv\Scripts\python -m pytest -q` · lint: `.venv\Scripts\ruff check .` · seed: `.venv\Scripts\python -m app.scripts.seed` · deploy: `git push --force https://Ayushjaiswal001:<HF_TOKEN>@huggingface.co/spaces/Ayushjaiswal001/ai-mentor-bot main` · secrets: `.venv\Scripts\python -m app.scripts.set_space_secrets Ayushjaiswal001/ai-mentor-bot <HF_TOKEN>` · test: `.venv\Scripts\python -m pytest -q` · lint: `.venv\Scripts\ruff check .` · migrate: `.venv\Scripts\alembic upgrade head` · seed: `.venv\Scripts\python -m app.scripts.seed`
 
@@ -62,10 +63,13 @@
 - [x] 24/24 tests green (8 new: ladder promote/demote/floor/retire, is_pass, due filtering, bank-reuse-no-LLM, revision finalize promotes); full app import smoke OK
 - [ ] Live E2E by Ayush: /today, /revision (after a lesson creates a due item — note: first review is due +1 day, so test by completing a lesson then waiting a day OR temporarily backdating). Reminder fires at chosen hour.
 
-### M3 — Adaptive & exercises (P1)
-- [ ] simplified/advanced lesson variants
-- [ ] `/exercise` + submission + T2 rubric feedback
-- [ ] Socratic hint ladder; free-text mentor chat (daily cap)
+### M3 — Adaptive & exercises (P1) — code ✅ 2026-06-13
+- [x] simplified/advanced lesson variants — `pick_variant` now honors `state.difficulty` (harder→advanced, simpler→simplified, plus failed-retake→simplified)
+- [x] `/exercise` + submission + **T2** rubric feedback (`engines/exercises.py`; spec+grade stored in Exercise.feedback_json — NO migration); 💡 Hint ladder + ⏭ Skip buttons
+- [x] Free-text **Socratic mentor** chat (`engines/mentor.py` + `handlers/chat.py`): any non-command text → graded as exercise submission if one is pending, else Socratic answer; daily cap via FREETEXT_DAILY_CAP (events type "freetext")
+- [x] `/settings` (difficulty + reminder hour) ; LLM router gained `generate_text` (json_mode param) for prose
+- [x] 30/30 tests (6 new: exercise issue/submit/skip, variant-by-difficulty, mentor answer+cap); app wiring smoke OK
+- [ ] Live test by Ayush after deploy: /exercise → submit code → graded; type a question → Socratic reply; /settings → set Harder → next /learn is deeper
 
 ### M4 — Projects & weekly assessment (P1)
 - [ ] Project coach engine (`plan_json` steps, check-ins), `/project`
@@ -82,7 +86,7 @@
 - [x] Ayush deployed on Render via Blueprint (blueprint exs-d8mim0bbc2fs73e1ge9g); secrets set; FIRST getUpdates probe = 409 → **bot IS polling from Render ✅** (Render reaches Telegram, unlike HF). Bot = **@trainmemybot** ("MyAImentor").
 - [x] Render URL: **https://ai-mentor-bot-ztj4.onrender.com** — /healthz {"ok":true}, root alive ✅
 - [x] Keep-alive: **GitHub Actions `keepalive.yml`** pings /healthz every 10 min (active, first run triggered). NOTE: GH cron can lag + auto-disables after 60 days repo inactivity → OPTIONAL upgrade: cron-job.org monitor on the same URL for tighter timing.
-- [ ] Ayush live test against @trainmemybot: /start /today /learn /revision (don't use getUpdates probe — it fights the poller; message the bot instead). AWAITING confirmation it replied + generated a lesson (confirms Gemini reachable from Render).
+- [x] Ayush live test against @trainmemybot — **confirmed running** 2026-06-12 (Render bot replied; Gemini reachable from Render).
 - [ ] Backup story for Neon (free tier has limited point-in-time restore) — revisit at M2 close
 - [ ] Full CI/CD (GitHub repo + Action → auto-push to HF); runbook in README
 

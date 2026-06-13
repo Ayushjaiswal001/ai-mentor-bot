@@ -66,13 +66,16 @@ async def _calls_today(session: AsyncSession, tier: str) -> int:
     ) or 0
 
 
-async def _call_gemini(model: str, system: str, user_text: str) -> str:
+async def _call_gemini(model: str, system: str, user_text: str, json_mode: bool = True) -> str:
     if not settings.gemini_api_key:
         raise LLMUnavailable("GEMINI_API_KEY not set")
+    gen_config: dict = {"temperature": 0.7}
+    if json_mode:
+        gen_config["response_mime_type"] = "application/json"
     body = {
         "system_instruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": [{"text": user_text}]}],
-        "generationConfig": {"response_mime_type": "application/json", "temperature": 0.7},
+        "generationConfig": gen_config,
     }
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         r = await client.post(
@@ -84,18 +87,19 @@ async def _call_gemini(model: str, system: str, user_text: str) -> str:
         return r.json()["candidates"][0]["content"]["parts"][0]["text"]
 
 
-async def _call_groq(model: str, system: str, user_text: str) -> str:
+async def _call_groq(model: str, system: str, user_text: str, json_mode: bool = True) -> str:
     if not settings.groq_api_key:
         raise LLMUnavailable("GROQ_API_KEY not set")
-    body = {
+    body: dict = {
         "model": model,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user_text},
         ],
-        "response_format": {"type": "json_object"},
         "temperature": 0.7,
     }
+    if json_mode:
+        body["response_format"] = {"type": "json_object"}
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         r = await client.post(
             GROQ_URL,
@@ -170,3 +174,50 @@ async def generate_json[T: BaseModel](
     )
     await session.flush()
     raise LLMUnavailable(f"all providers failed for {tier}: {last_err}")
+
+
+async def generate_text(
+    session: AsyncSession,
+    tier: str,
+    system: str,
+    user_text: str,
+    user_id: int | None = None,
+) -> str:
+    """Free-form text generation (no schema) across the tier's provider chain."""
+    cap = _cap(tier)
+    if cap is not None and await _calls_today(session, tier) >= cap:
+        raise LLMBudgetExceeded(f"daily cap for {tier} reached ({cap} calls)")
+
+    last_err: Exception | None = None
+    for spec in _chains()[tier]:
+        provider, model = spec.split(":", 1)
+        try:
+            raw = await _PROVIDERS[provider](model, system, user_text, False)
+        except Exception as e:
+            last_err = e
+            continue
+        session.add(
+            Event(
+                user_id=user_id,
+                type="llm_usage",
+                payload_json={"tier": tier, "model": spec, "ok": True, "mode": "text"},
+            )
+        )
+        await session.flush()
+        return raw.strip()
+
+    raise LLMUnavailable(f"all providers failed for {tier}: {last_err}")
+
+
+async def count_events_today(session: AsyncSession, user_id: int, event_type: str) -> int:
+    """Count today's events of a given type for a user (e.g. free-text mentor turns)."""
+    day_start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+    return (
+        await session.scalar(
+            select(func.count(Event.id)).where(
+                Event.user_id == user_id,
+                Event.type == event_type,
+                Event.created_at >= day_start,
+            )
+        )
+    ) or 0

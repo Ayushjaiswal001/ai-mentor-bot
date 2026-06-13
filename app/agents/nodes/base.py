@@ -20,8 +20,10 @@ def render_system(profile: dict) -> str:
     return _env.get_template("mentor_persona.md").render(**profile)
 
 
-def render_task(template_name: str, schema_cls: type[BaseModel], **ctx) -> str:
-    return _env.get_template(template_name).render(
-        schema_json=json.dumps(schema_cls.model_json_schema(), separators=(",", ":")),
-        **ctx,
+def render_task(template_name: str, schema_cls: type[BaseModel] | None, **ctx) -> str:
+    schema_json = (
+        json.dumps(schema_cls.model_json_schema(), separators=(",", ":"))
+        if schema_cls is not None
+        else ""
     )
+    return _env.get_template(template_name).render(schema_json=schema_json, **ctx)

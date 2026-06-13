@@ -43,8 +43,11 @@ async def next_topic(session: AsyncSession, state: UserState) -> Topic | None:
     return topics[idx + 1] if idx + 1 < len(topics) else None
 
 
-async def pick_variant(session: AsyncSession, user: User, topic_id: int) -> str:
-    """Simplified variant if the last lesson-quiz on this topic scored < 50%."""
+async def pick_variant(
+    session: AsyncSession, user: User, topic_id: int, difficulty: str = "normal"
+) -> str:
+    """Choose lesson depth: a failed retake forces simplified; otherwise the user's
+    difficulty setting steers simplified / standard / advanced."""
     last_score = await session.scalar(
         select(QuizAttempt.score_pct)
         .join(Quiz, QuizAttempt.quiz_id == Quiz.id)
@@ -57,7 +60,13 @@ async def pick_variant(session: AsyncSession, user: User, topic_id: int) -> str:
         .order_by(QuizAttempt.finished_at.desc())
         .limit(1)
     )
-    return "simplified" if last_score is not None and last_score < 50 else "standard"
+    if last_score is not None and last_score < 50:
+        return "simplified"
+    if difficulty == "harder":
+        return "advanced"
+    if difficulty == "simpler":
+        return "simplified"
+    return "standard"
 
 
 async def get_or_create_lesson(
@@ -73,7 +82,7 @@ async def get_or_create_lesson(
     if pair is None:
         return None
     topic, phase = pair
-    variant = await pick_variant(session, user, topic.id)
+    variant = await pick_variant(session, user, topic.id, state.difficulty)
 
     lesson = await session.scalar(
         select(Lesson).where(

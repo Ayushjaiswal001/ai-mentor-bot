@@ -55,6 +55,30 @@ def revise_kb(n: int) -> InlineKeyboardMarkup:
     )
 
 
+def exercise_kb(ex_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("💡 Hint", callback_data=f"ex:hint:{ex_id}"),
+                InlineKeyboardButton("⏭ Skip", callback_data=f"ex:skip:{ex_id}"),
+            ]
+        ]
+    )
+
+
+def settings_kb() -> InlineKeyboardMarkup:
+    diff_row = [
+        InlineKeyboardButton("🐣 Simpler", callback_data="set:diff:simpler"),
+        InlineKeyboardButton("⚖️ Normal", callback_data="set:diff:normal"),
+        InlineKeyboardButton("🔥 Harder", callback_data="set:diff:harder"),
+    ]
+    hour_row = [
+        InlineKeyboardButton(f"⏰ {h}:00", callback_data=f"set:hour:{h}") for h in (19, 20, 21)
+    ]
+    off_row = [InlineKeyboardButton("🔕 Reminder off", callback_data="set:hour:off")]
+    return InlineKeyboardMarkup([diff_row, hour_row, off_row])
+
+
 def today_kb(has_lesson: bool, due_count: int) -> InlineKeyboardMarkup | None:
     rows = []
     if has_lesson:

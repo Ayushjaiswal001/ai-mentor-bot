@@ -14,28 +14,22 @@ HELP = (
     "/learn — start or resume a lesson (10–20 min, stop any time)\n"
     "/quiz — 5 questions on your current topic\n"
     "/revision — spaced-repetition reviews of past topics\n"
+    "/exercise — a coding exercise I grade with feedback\n"
     "/progress — streak, XP, scores, weak spots\n"
-    "/roadmap — the journey: Python → FastAPI → ML → Transformers → LLMs → LangGraph\n\n"
+    "/roadmap — the journey: Python → FastAPI → ML → Transformers → LLMs → LangGraph\n"
+    "/settings — difficulty & reminder time\n\n"
+    "💬 <b>Just type a question</b> anytime and I'll answer it Socratically.\n\n"
     "<b>The method:</b>\n"
     "• Active recall — I ask before I tell.\n"
     "• Adaptive difficulty — score ≥80% advances you; &lt;50% gets a simpler retake.\n"
     "• Spaced repetition — topics return at 1/3/7/14/30 days; pass to push them further out.\n"
-    "• Daily nudge — set a reminder time in /start (or turn it off).\n\n"
-    "Coming soon: /exercise · /project · /settings · free-chat mentor"
-)
-
-FREE_TEXT = (
-    "💬 Free-chat with me unlocks in a later upgrade!\n"
-    "For now: /learn to study, /quiz to test yourself, /help to see everything."
+    "• Daily nudge — set a reminder time in /settings (or turn it off).\n\n"
+    "Coming soon: /project · weekly assessment"
 )
 
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await send_html(update.effective_message, HELP)
-
-
-async def free_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await send_html(update.effective_message, FREE_TEXT)
 
 
 async def progress_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

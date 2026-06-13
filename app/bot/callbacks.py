@@ -3,7 +3,8 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from app.bot.handlers import learn, quiz, revision, start
+from app.bot.handlers import exercise, learn, quiz, revision, start
+from app.bot.handlers import settings as settings_h
 from app.bot.users import ensure_user
 from app.db.session import SessionLocal
 
@@ -39,3 +40,11 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 await quiz.on_answer(
                     message, session, user, state, int(attempt_id), int(q_idx), int(choice)
                 )
+            case ["ex", "hint", ex_id]:
+                await exercise.on_hint(message, context, session, int(ex_id))
+            case ["ex", "skip", ex_id]:
+                await exercise.on_skip(message, session, int(ex_id))
+            case ["set", "diff", value]:
+                await settings_h.on_difficulty(query, session, user, state, value)
+            case ["set", "hour", arg]:
+                await settings_h.on_reminder(query, session, user, state, arg)

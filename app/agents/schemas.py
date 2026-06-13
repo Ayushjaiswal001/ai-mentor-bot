@@ -55,3 +55,20 @@ class MCQ(BaseModel):
 class QuizSchema(BaseModel):
     topic_slug: str
     questions: list[MCQ] = Field(min_length=5, max_length=5)
+
+
+class ExerciseSchema(BaseModel):
+    topic_slug: str
+    title: str
+    prompt_md: str
+    starter_code: str = ""
+    hints: list[str] = Field(min_length=2, max_length=4)  # progressive Socratic hints
+    rubric: list[str] = Field(min_length=2, max_length=5)  # criteria the evaluator checks
+
+
+class EvalSchema(BaseModel):
+    passed: bool
+    score: int = Field(ge=0, le=100)
+    strengths: list[str] = Field(max_length=5)
+    issues: list[str] = Field(max_length=5)
+    suggestion: str  # one concrete, encouraging next step (Socratic, not the full solution)
