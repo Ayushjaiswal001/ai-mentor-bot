@@ -112,6 +112,18 @@
 
 *(none — all five answered 2026-06-12 and folded into Decisions #10–13)*
 
+## ⛔ CRITICAL FINDING (2026-06-12): Hugging Face Spaces CANNOT host this bot
+
+Proven by an in-container network probe (`app/diagnostics.py`):
+- `example.com` → 200, `generativelanguage.googleapis.com` (Gemini) → connects in 0.1s → **general egress works**.
+- `api.telegram.org` (149.154.166.110) → **ConnectTimeout on BOTH IPv4 and IPv6**.
+- ⇒ HF Spaces blocks egress to Telegram's IP range. Polling AND webhook both fail (replies also need outbound to api.telegram.org). **HF is a dead end for any Telegram bot. Do not retry HF.**
+- The single-loop + resilient-bootstrap rewrite (commits after 69ca93d) is GOOD and host-agnostic — keep it. The diagnostic call was removed from `amain` (module kept for future host checks).
+- The earlier M1 "test successful" was the LOCAL bot (running on Ayush's PC at the time), not the cloud one.
+
+**DECISION PENDING (Ayush):** pick a new host that can reach Telegram, free, no credit card.
+Leading candidate: **Render** free web service (reaches Telegram; no CC; needs a keep-alive ping vs 15-min idle spin-down; 750 hrs/mo ≈ one always-on service). Requires code on GitHub (Ayush has an account; public repo = portfolio bonus; bot stays allowlisted). Alt: Koyeb (may require CC). Neon DB stays as-is. HF Space can be deleted later.
+
 ## Notes / surprises
 
 - **Py3.12 + ptb v21 gotcha:** `asyncio.run(init_db())` before `run_polling()` crashes (`no current event loop`) — fixed by moving `init_db()` into the app's `post_init` hook. Don't reintroduce.
