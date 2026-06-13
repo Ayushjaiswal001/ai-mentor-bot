@@ -11,8 +11,9 @@
 
 ## Status
 
-- **Phase:** `M5 CODE COMPLETE ✅ — deploying. ALL MILESTONES M0–M5 DONE. Bot feature-complete per original spec.`
-- **Last updated:** 2026-06-13 (Session 1 cont. — M5 built: LangGraph Writer→Critic lesson graph. 39/39 tests. Pushing to GitHub→Render. langgraph dep added → slower build.)
+- **Phase:** `🎉 ALL MILESTONES M0–M5 DEPLOYED & LIVE on Render. Bot feature-complete per original spec.`
+- **Last updated:** 2026-06-13 (Session 1 cont. — M5 deployed+verified: healthz steady 8/8, polling 409. langgraph imports clean in container. 39/39 tests.)
+- **Next action:** Ayush uses the bot! Optional future work (all P3, none blocking): quiz writer→critic, 10-task golden eval CI, /skip for free-text-vs-exercise disambiguation, rendered diagrams, GitHub homework verification. See docs/03 Future Improvements.
 - **Next action:** confirm Render redeploy polling (409 probe) + healthz; Ayush live-tests /exercise + free-text chat + /settings. Then M4: project coach (plan→steps→review) + Sunday weekly assessment + report card.
 - **Deploy:** `git push origin main` → GitHub `Ayushjaiswal001/ai-mentor-bot` → **Render auto-deploys** (~3-5 min). Render URL https://ai-mentor-bot-ztj4.onrender.com. Bot @trainmemybot. Neon Postgres (Singapore). Keep-alive = GitHub Actions `keepalive.yml` every 10 min.
 - **⚠️ Run rules:** the CLOUD bot is now the live instance. Do NOT run `run_bot.bat` locally while the Space is running (two pollers fight over getUpdates). For local dev: pause the Space (Settings → Pause) first. Local `.env` now points at Neon too — local runs share the same cloud DB (no split progress).
@@ -84,7 +85,8 @@
 - [x] Critic node (`nodes/critic.py` + `lesson_critic.md`, T0): checks checkpoints exist, code actually runs, difficulty matches variant, no vague/incorrect explanations → Critique{ok, notes}; notes fed back into writer prompt on revision
 - [x] 39/39 tests (4 new graph: first-pass accept, 1-revision loop, revision cap, notes-fed-back). Graph compiled per-call w/ session-bound node closures (no config plumbing)
 - [ ] (deferred, optional) extend writer→critic to quizzes; prompt versioning already logged via PROMPT_VERSION; 10-task golden eval set — nice-to-have, not blocking
-- [ ] Live test by Ayush after deploy: /learn still works (now graph-backed — should be same or better quality)
+- [x] Deployed & verified on Render (healthz 8/8 steady, polling 409) 2026-06-13
+- [ ] Live test by Ayush: /learn still works (now graph-backed — same or better quality)
 
 ### M6 — Ship & harden (P2) — host part DONE EARLY ✅ 2026-06-12
 - [x] Dockerfile (root, HF-compatible, health server on :7860)
