@@ -1,0 +1,22 @@
+# Render Blueprint — deploy via Render dashboard → "New +" → "Blueprint" → pick this repo.
+# Render prompts for each secret (sync:false) on first deploy. Free plan, Docker runtime.
+services:
+  - type: web
+    name: ai-mentor-bot
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ALLOWED_TG_USER_IDS
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
