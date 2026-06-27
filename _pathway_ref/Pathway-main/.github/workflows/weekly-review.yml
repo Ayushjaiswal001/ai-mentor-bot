@@ -1,0 +1,27 @@
+name: Weekly review
+
+on:
+  schedule:
+    - cron: "0 16 * * 0"
+  workflow_dispatch:
+
+permissions: {}
+concurrency:
+  group: weekly-review
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger weekly workflow
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          INTERNAL_TRIGGER_SECRET: ${{ secrets.INTERNAL_TRIGGER_SECRET }}
+        run: |
+          REQUEST_ID="weekly-${{ github.run_id }}-${{ github.run_attempt }}"
+          curl --fail-with-body --retry 3 \
+            -H "Content-Type: application/json" \
+            -H "X-PathwayAI-Secret: $INTERNAL_TRIGGER_SECRET" \
+            -d "{\"request_id\":\"$REQUEST_ID\"}" \
+            "$APP_BASE_URL/internal/triggers/weekly-review"

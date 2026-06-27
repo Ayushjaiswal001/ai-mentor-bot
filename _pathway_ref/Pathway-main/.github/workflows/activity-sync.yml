@@ -1,0 +1,31 @@
+name: Activity sync
+
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+
+permissions: {}
+concurrency:
+  group: activity-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        trigger: [github-sync, leetcode-sync]
+    steps:
+      - name: Trigger ${{ matrix.trigger }}
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          INTERNAL_TRIGGER_SECRET: ${{ secrets.INTERNAL_TRIGGER_SECRET }}
+        run: |
+          REQUEST_ID="${{ matrix.trigger }}-${{ github.run_id }}-${{ github.run_attempt }}"
+          curl --fail-with-body --retry 3 \
+            -H "Content-Type: application/json" \
+            -H "X-PathwayAI-Secret: $INTERNAL_TRIGGER_SECRET" \
+            -d "{\"request_id\":\"$REQUEST_ID\"}" \
+            "$APP_BASE_URL/internal/triggers/${{ matrix.trigger }}"

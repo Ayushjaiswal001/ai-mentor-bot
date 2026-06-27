@@ -1,0 +1,25 @@
+name: Daily nudge
+
+on:
+  schedule:
+    - cron: "30 14 * * *" # 20:00 IST (Asia/Kolkata)
+  workflow_dispatch:
+
+permissions: {}
+concurrency:
+  group: daily-nudge
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Nudge users who have not logged today
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          INTERNAL_TRIGGER_SECRET: ${{ secrets.INTERNAL_TRIGGER_SECRET }}
+        run: |
+          curl --fail-with-body --retry 3 \
+            -X POST \
+            -H "X-PathwayAI-Secret: $INTERNAL_TRIGGER_SECRET" \
+            "$APP_BASE_URL/admin/daily-nudge"

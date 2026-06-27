@@ -1,0 +1,27 @@
+name: Morning check-in
+
+on:
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+permissions: {}
+concurrency:
+  group: morning-checkin
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger morning workflow
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          INTERNAL_TRIGGER_SECRET: ${{ secrets.INTERNAL_TRIGGER_SECRET }}
+        run: |
+          REQUEST_ID="morning-${{ github.run_id }}-${{ github.run_attempt }}"
+          curl --fail-with-body --retry 3 \
+            -H "Content-Type: application/json" \
+            -H "X-PathwayAI-Secret: $INTERNAL_TRIGGER_SECRET" \
+            -d "{\"request_id\":\"$REQUEST_ID\"}" \
+            "$APP_BASE_URL/internal/triggers/morning-checkin"
